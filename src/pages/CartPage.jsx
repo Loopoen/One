@@ -56,11 +56,10 @@
       const savedCart = localStorage.getItem('cart-items')
 
       if (savedCart) {
-        console.log("one")
         setItems(JSON.parse(savedCart))
       }
 
-    }, [])
+    }, [setItems])
 
 
 
@@ -73,7 +72,7 @@
         JSON.stringify(items)
       )
 
-    }, [])
+    }, [items])
 
 
     const formatPrice = (p) =>
