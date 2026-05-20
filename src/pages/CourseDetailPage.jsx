@@ -1,6 +1,11 @@
 import {
-  useParams,
-  useNavigate
+  useEffect,
+  useState
+} from "react"
+
+import {
+  useNavigate,
+  useParams
 } from "react-router-dom"
 
 import {
@@ -12,8 +17,6 @@ import {
   cartState,
   userState
 } from "../store/atoms"
-
-import useFetch from "../hooks/useFetch"
 
 import { mockApi }
 from "../api/mockApi"
@@ -34,19 +37,86 @@ function CourseDetailPage() {
     useSetRecoilState(cartState)
 
 
-  const {
-    data,
-    loading,
-    error
-  } = useFetch(
+  // =====================================================
+  // STATE
+  // =====================================================
+  const [course, setCourse] =
+    useState(null)
 
-    () =>
-      mockApi.getCourseById(id),
+  const [loading, setLoading] =
+    useState(true)
 
-    [id]
-  )
+  const [error, setError] =
+    useState("")
 
 
+  // =====================================================
+  // FETCH COURSE
+  // =====================================================
+  useEffect(() => {
+
+    const fetchCourse =
+    async () => {
+
+      try {
+
+        setLoading(true)
+
+        setError("")
+
+
+        // lấy tất cả khóa học
+        const data =
+          await mockApi.getCourses()
+
+
+        // API có thể trả:
+        // [] hoặc { data: [] }
+
+        const courses =
+          Array.isArray(data)
+
+            ? data
+
+            : data.data || []
+
+
+        // tìm theo id
+        const found =
+          courses.find(
+
+            item =>
+
+              String(item.id) ===
+              String(id)
+          )
+
+
+        setCourse(found)
+
+      }
+      catch (err) {
+
+        setError(
+
+          err.message ||
+          "Có lỗi xảy ra"
+        )
+      }
+      finally {
+
+        setLoading(false)
+      }
+    }
+
+    fetchCourse()
+
+  }, [id])
+
+
+  // =====================================================
+  // ADD TO CART
+  // =====================================================
   const handleAddToCart =
   () => {
 
@@ -63,21 +133,25 @@ function CourseDetailPage() {
     }
 
 
-    setCart(prev => {
+    setCart(prevCart => {
 
-      const exist =
-        prev.find(
+      const existed =
+        prevCart.find(
 
           item =>
-            item.id === data.id
+
+            String(item.id) ===
+            String(course.id)
         )
 
+
       // đã tồn tại
-      if (exist) {
+      if (existed) {
 
-        return prev.map(item =>
+        return prevCart.map(item =>
 
-          item.id === data.id
+          String(item.id) ===
+          String(course.id)
 
             ? {
                 ...item,
@@ -89,13 +163,14 @@ function CourseDetailPage() {
         )
       }
 
+
       // chưa tồn tại
       return [
 
-        ...prev,
+        ...prevCart,
 
         {
-          ...data,
+          ...course,
           quantity: 1
         }
       ]
@@ -108,66 +183,91 @@ function CourseDetailPage() {
   }
 
 
-  // loading
+  // =====================================================
+  // LOADING
+  // =====================================================
   if (loading) {
 
     return (
-      <h2>
-        Loading...
-      </h2>
+      <div className="page">
+
+        <h1>
+          ⏳ Loading...
+        </h1>
+
+      </div>
     )
   }
 
 
-  // error
+  // =====================================================
+  // ERROR
+  // =====================================================
   if (error) {
 
     return (
-      <h2>
-        {error}
-      </h2>
+      <div className="page">
+
+        <h1>
+          ❌ {error}
+        </h1>
+
+      </div>
     )
   }
 
 
-  // not found
-  if (!data) {
+  // =====================================================
+  // NOT FOUND
+  // =====================================================
+  if (!course) {
 
     return (
-      <h2>
-        Không tìm thấy khóa học
-      </h2>
+      <div className="page">
+
+        <h1>
+          Không tìm thấy khóa học
+        </h1>
+
+      </div>
     )
   }
 
 
+  // =====================================================
+  // UI
+  // =====================================================
   return (
-    <div>
+    <div className="page detail-page">
 
       <img
-        src={data.image}
-        alt={data.title}
-        width="300"
+        src={course.image}
+        alt={course.title}
       />
 
+
       <h1>
-        {data.title}
+        {course.title}
       </h1>
 
+
       <h3>
-        {data.instructor}
+        👨‍🏫 {course.instructor}
       </h3>
 
-      <p>
-        {data.level}
-      </p>
 
       <p>
-        {data.description}
+        📘 {course.level}
       </p>
+
+
+      <p>
+        {course.description}
+      </p>
+
 
       <h2>
-        {data.price}
+        💰 {course.price}
       </h2>
 
 

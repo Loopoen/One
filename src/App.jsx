@@ -5,7 +5,8 @@ import {
 } from "react-router-dom"
 
 import {
-  useRecoilValue
+  useRecoilValue,
+  useSetRecoilState
 } from "recoil"
 
 import {
@@ -52,6 +53,15 @@ function App() {
 
   const user =
     useRecoilValue(userState)
+  const setUser = useSetRecoilState(userState)
+
+  const handleLogout = () =>{
+    setUser(null)
+
+    localStorage.removeItem("user")
+
+    alert("dang xuat thanh cong")
+  }
 
 
   return (
@@ -101,12 +111,20 @@ function App() {
             user
 
               ? (
-                <span>
+               <div>
+                 <span>
 
                   Xin chào:
                   {user.username}
 
                 </span>
+
+                <button onClick={handleLogout} >
+                  Dang xuat
+                </button>
+               </div>
+
+              
               )
 
               : (

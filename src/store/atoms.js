@@ -3,23 +3,23 @@ import {
   selector
 } from "recoil"
 
-
 export const userState = atom({
 
   key: "userState",
 
-  default:
+  default: (() => {
 
-    JSON.parse(
-
+    const saved =
       localStorage.getItem(
         "user"
       )
 
-    ) || null
+    return saved
+      ? JSON.parse(saved)
+      : null
+
+  })()
 })
-
-
 
 export const cartState = atom({
 
@@ -31,7 +31,6 @@ export const cartState = atom({
 
     ({ setSelf, onSet }) => {
 
-      // LOAD
       const savedCart =
         localStorage.getItem(
           "cart-items"
@@ -45,7 +44,7 @@ export const cartState = atom({
       }
 
 
-     
+      // SAVE
       onSet((newItems) => {
 
         localStorage.setItem(
@@ -64,17 +63,19 @@ export const myCoursesState = atom({
 
   key: "myCoursesState",
 
-  default:
+  default: (() => {
 
-    JSON.parse(
-
+    const saved =
       localStorage.getItem(
         "myCourses"
       )
 
-    ) || []
-})
+    return saved
+      ? JSON.parse(saved)
+      : []
 
+  })()
+})
 
 export const cartTotalState =
 selector({

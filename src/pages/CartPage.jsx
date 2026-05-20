@@ -25,7 +25,9 @@ function CartPage() {
     )
 
 
-  
+  // =====================================================
+  // REMOVE
+  // =====================================================
   const removeItem = (id) => {
 
     setItems(prev =>
@@ -37,6 +39,9 @@ function CartPage() {
   }
 
 
+  // =====================================================
+  // UPDATE
+  // =====================================================
   const updateQuantity =
   (id, quantity) => {
 
@@ -66,6 +71,9 @@ function CartPage() {
   }
 
 
+  // =====================================================
+  // CHECKOUT
+  // =====================================================
   const handleCheckout = () => {
 
     if (items.length === 0) {
@@ -78,7 +86,7 @@ function CartPage() {
     }
 
 
-  
+    // thêm vào khóa học của tôi
     setMyCourses(prev => [
 
       ...prev,
@@ -87,7 +95,7 @@ function CartPage() {
     ])
 
 
-  
+    // clear cart
     setItems([])
 
     alert(
