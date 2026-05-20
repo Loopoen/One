@@ -1,125 +1,220 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
-import { Link } from 'react-router-dom'
-import { useSetRecoilState } from 'recoil'
-import { cartState } from '../store/atoms'
-import { mockApi } from '../api/mockApi'
+import {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback
+} from "react"
+
+import {
+  Link
+} from "react-router-dom"
+
+import {
+  useSetRecoilState,
+  useRecoilValue
+} from "recoil"
+
+import {
+  cartState,
+  userState
+} from "../store/atoms"
+
+import { mockApi }
+from "../api/mockApi"
+
 
 export default function CourseListPage() {
 
-  // ============================================================
-  // Câu 1
-  // ============================================================
-  const [courses, setCourses] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  // =====================================================
+  // DATA
+  // =====================================================
+  const [courses, setCourses] =
+    useState([])
 
- useEffect(() => {
+  const [loading, setLoading] =
+    useState(false)
 
-  const fetchCourses = async () => {
-
-    try {
-
-      setLoading(true)
-      setError(null)
-
-      const data = await mockApi.getCourses()
+  const [error, setError] =
+    useState(null)
 
 
+  useEffect(() => {
 
-      setCourses(
-        Array.isArray(data)
-          ? data
-          :  data.data || []
-      )
+    const fetchCourses =
+    async () => {
 
+      try {
+
+        setLoading(true)
+
+        setError(null)
+
+        const data =
+          await mockApi.getCourses()
+
+        setCourses(
+
+          Array.isArray(data)
+
+            ? data
+
+            : data.data || []
+        )
+      }
+      catch (err) {
+
+        setError(
+          err.message
+        )
+      }
+      finally {
+
+        setLoading(false)
+      }
     }
-    catch (err) {
 
-      setError(
-        err.message || 'Có lỗi xảy ra'
-      )
+    fetchCourses()
 
-    }
-    finally {
-
-      setLoading(false)
-
-    }
-  }
-
-  fetchCourses()
-
-}, [])
+  }, [])
 
 
-  // ============================================================
-  // Câu 2
-  // ============================================================
-  const [keyword, setKeyword] = useState('')
-  const [levelFilter, setLevelFilter] = useState('')
-  const [sortBy, setSortBy] = useState('')
+  // =====================================================
+  // FILTER
+  // =====================================================
+  const [keyword, setKeyword] =
+    useState("")
+
+  const [levelFilter,
+    setLevelFilter] =
+    useState("")
+
+  const [sortBy, setSortBy] =
+    useState("")
 
 
-  // ============================================================
-  // Câu 3
-  // ============================================================
-  const filteredCourses = useMemo(() => {
+  // =====================================================
+  // MEMO
+  // =====================================================
+  const filteredCourses =
+  useMemo(() => {
 
-    let result = [...courses]
+    let result =
+      [...courses]
 
+    // search
     if (keyword.trim()) {
-      result = result.filter(course =>
-        course.title.toLowerCase().includes(keyword.toLowerCase())
+
+      result = result.filter(
+
+        course =>
+
+          course.title
+            .toLowerCase()
+            .includes(
+              keyword.toLowerCase()
+            )
       )
     }
 
-    // filter level
+    // filter
     if (levelFilter) {
-      result = result.filter(course =>
-        course.level === levelFilter
+
+      result = result.filter(
+
+        course =>
+
+          course.level ===
+          levelFilter
       )
     }
 
     // sort
-    if (sortBy === 'price-asc') {
-      result.sort((a, b) => a.price - b.price)
+    if (sortBy === "price-asc") {
+
+      result.sort(
+
+        (a, b) =>
+
+          a.price - b.price
+      )
     }
 
-    if (sortBy === 'price-desc') {
-      result.sort((a, b) => b.price - a.price)
+    if (sortBy === "price-desc") {
+
+      result.sort(
+
+        (a, b) =>
+
+          b.price - a.price
+      )
     }
 
     return result
 
-  }, [courses, keyword, levelFilter, sortBy])
+  }, [
+
+    courses,
+    keyword,
+    levelFilter,
+    sortBy
+  ])
 
 
-  // ============================================================
-  // Câu 4
-  // ============================================================
-  const setCart = useSetRecoilState(cartState)
+  // =====================================================
+  // CART
+  // =====================================================
+  const setCart =
+    useSetRecoilState(cartState)
 
-  console.log("hehe",setCart)
+  const user =
+    useRecoilValue(userState)
 
-  const handleAddToCart = useCallback((course) => {
+
+  const handleAddToCart =
+  useCallback((course) => {
+
+    // chưa login
+    if (!user) {
+
+      alert(
+        "Bạn cần đăng nhập"
+      )
+
+      return
+    }
+
 
     setCart(prevCart => {
 
-      const existed = prevCart.find(item => item.id === course.id)
+      const existed =
+        prevCart.find(
 
-     
+          item =>
+            item.id === course.id
+        )
+
+      // tồn tại
       if (existed) {
+
         return prevCart.map(item =>
+
           item.id === course.id
-            ? { ...item, quantity: item.quantity + 1 }
+
+            ? {
+                ...item,
+                quantity:
+                  item.quantity + 1
+              }
+
             : item
         )
       }
 
-      
+      // chưa tồn tại
+      return [
 
-      return [  
         ...prevCart,
+
         {
           ...course,
           quantity: 1
@@ -127,140 +222,175 @@ export default function CourseListPage() {
       ]
     })
 
-    alert("Đã thêm vào giỏ hàng!")
+    alert(
+      "Đã thêm vào giỏ hàng!"
+    )
 
-  }, [setCart])
+  }, [setCart, user])
 
 
   return (
     <div>
-      <h1 className="page-title">Danh sách khóa học</h1>
 
-      <div className="toolbar">
+      <h1>
+        Danh sách khóa học
+      </h1>
+
+
+      {/* SEARCH */}
+      <div>
 
         <input
           type="text"
-          placeholder="🔍 Tìm theo tên khóa học..."
+
+          placeholder="Tìm khóa học..."
+
           value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
+
+          onChange={(e) =>
+            setKeyword(
+              e.target.value
+            )
+          }
         />
+
 
         <select
           value={levelFilter}
-          onChange={(e) => setLevelFilter(e.target.value)}
+
+          onChange={(e) =>
+            setLevelFilter(
+              e.target.value
+            )
+          }
         >
-          <option value="">Tất cả trình độ</option>
-          <option value="Cơ bản">Cơ bản</option>
-          <option value="Trung bình">Trung bình</option>
-          <option value="Nâng cao">Nâng cao</option>
+          <option value="">
+            Tất cả
+          </option>
+
+          <option value="Cơ bản">
+            Cơ bản
+          </option>
+
+          <option value="Trung bình">
+            Trung bình
+          </option>
+
+          <option value="Nâng cao">
+            Nâng cao
+          </option>
+
         </select>
+
 
         <select
           value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
+
+          onChange={(e) =>
+            setSortBy(
+              e.target.value
+            )
+          }
         >
-          <option value="">Mặc định</option>
-          <option value="price-asc">Giá tăng dần</option>
-          <option value="price-desc">Giá giảm dần</option>
+          <option value="">
+            Mặc định
+          </option>
+
+          <option value="price-asc">
+            Giá tăng dần
+          </option>
+
+          <option value="price-desc">
+            Giá giảm dần
+          </option>
+
         </select>
 
-        <div className="spacer" />
-
-        <span style={{ color: '#6b7280', fontSize: 14 }}>
-          Hiển thị: <b>{filteredCourses.length}</b> / {courses.length} khóa học
-        </span>
-
       </div>
 
-      {loading && (
-        <div className="loading">
-          ⏳ Đang tải dữ liệu...
-        </div>
-      )}
 
-      {error && (
-        <div className="error-box">
-          ❌ {error}
-        </div>
-      )}
+      {/* LOADING */}
+      {
+        loading &&
 
-      {!loading && !error && filteredCourses.length === 0 && (
-        <div className="empty">
-          😔 Không có khóa học nào phù hợp
-        </div>
-      )}
-
-      <div className="course-grid">
-        {filteredCourses.map(course => (
-          <CourseCard
-            key={course.id}
-            course={course}
-            onAddToCart={handleAddToCart}
-          />
-        ))}
-      </div>
-
-    </div>
-  )
-}
+        <h2>
+          Loading...
+        </h2>
+      }
 
 
-// =============================================================
-// Câu 5
-// =============================================================
-function CourseCard({ course, onAddToCart }) {
+      {/* ERROR */}
+      {
+        error &&
 
-  const formatPrice = new Intl.NumberFormat(
-    'vi-VN',
-    {
-      style: 'currency',
-      currency: 'VND'
-    }
-  ).format(course.price)
+        <h2>
+          {error}
+        </h2>
+      }
 
-  return (
-    <div className="course-card">
 
-      <img
-        src={course.image}
-        alt={course.title}
-      />
+      {/* EMPTY */}
+      {
+        !loading &&
+        filteredCourses.length === 0 &&
 
-      <div className="course-card-body">
+        <h2>
+          Không có khóa học
+        </h2>
+      }
 
-        <span className="level">
-          {course.level}
-        </span>
 
-        <h3>
-          {course.title}
-        </h3>
+      {/* LIST */}
+      <div>
 
-        <p className="instructor">
-          👨‍🏫 {course.instructor}
-        </p>
+        {
+          filteredCourses.map(course => (
 
-        <p className="price">
-          {formatPrice}
-        </p>
+            <div
+              key={course.id}
+            >
 
-      </div>
+              <img
+                src={course.image}
+                alt={course.title}
+                width="200"
+              />
 
-      <div className="course-card-footer">
+              <h3>
+                {course.title}
+              </h3>
 
-        <Link
-          to={`/courses/${course.id}`}
-          className="btn-detail"
-        >
-          Xem chi tiết
-        </Link>
+              <p>
+                {course.instructor}
+              </p>
 
-        <button
-          className="btn-cart"
-          onClick={() => onAddToCart(course)}
-        >
-          Thêm vào giỏ
-        </button>
+              <p>
+                {course.level}
+              </p>
+
+              <p>
+                {course.price}
+              </p>
+
+
+              <Link
+                to={`/courses/${course.id}`}
+              >
+                Xem chi tiết
+              </Link>
+
+
+              <button
+                onClick={() =>
+                  handleAddToCart(course)
+                }
+              >
+                Thêm vào giỏ
+              </button>
+
+            </div>
+          ))
+        }
 
       </div>
 

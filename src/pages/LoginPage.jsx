@@ -1,147 +1,124 @@
-import { useState } from 'react'
-import { useRecoilState } from 'recoil'
-import { userState } from '../store/atoms'
+import {
+  useState
+} from "react"
 
-export default function LoginPage() {
+import {
+  useNavigate
+} from "react-router-dom"
 
-  // ============================================================
-  // Câu 7 - Recoil cho User
-  // ============================================================
-  const [user, setUser] = useRecoilState(userState)
+import {
+  useSetRecoilState
+} from "recoil"
 
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+import {
+  userState
+} from "../store/atoms"
 
 
-  const handleLogin = (e) => {
+function LoginPage() {
+
+  const navigate =
+    useNavigate()
+
+  const setUser =
+    useSetRecoilState(userState)
+
+
+  const [username, setUsername] =
+    useState("")
+
+  const [password, setPassword] =
+    useState("")
+
+  const [error, setError] =
+    useState("")
+
+
+  const handleSubmit = (e) => {
 
     e.preventDefault()
 
-  
-    setError('')
+    // TK giả
+    if (
 
-    // validate
-    if (!username.trim() || !password.trim()) {
-      setError('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu')
-      return
+      username === "admin" &&
+      password === "123456"
+
+    ) {
+
+      setUser({
+
+        username
+      })
+
+      alert(
+        "Đăng nhập thành công!"
+      )
+
+      navigate("/")
     }
+    else {
 
-    
-    setUser({
-      username,
-      loginTime: new Date().toLocaleString('vi-VN')
-    })
-
-  
-    setUsername('')
-    setPassword('')
-  }
-
-
-  
-  const handleLogout = () => {
-    setUser(null)
+      setError(
+        "Sai tài khoản hoặc mật khẩu"
+      )
+    }
   }
 
 
   return (
-    <div className="auth-wrap">
+    <div>
 
-      <div className="auth-card">
+      <h1>
+        Đăng nhập
+      </h1>
 
-        {user ? (
+      <form onSubmit={handleSubmit}>
 
-          <div style={{ textAlign: 'center' }}>
+        <input
+          type="text"
 
-            <h2>
-              👋 Xin chào, {user.username}!
-            </h2>
+          placeholder="Username"
 
-            <p style={{ marginTop: 12 }}>
-              🕒 Thời gian đăng nhập:
-            </p>
+          value={username}
 
-            <p style={{ color: '#6b7280' }}>
-              {user.loginTime}
-            </p>
+          onChange={(e) =>
+            setUsername(
+              e.target.value
+            )
+          }
+        />
 
-            <button
-              className="btn btn-danger"
-              style={{ marginTop: 20 }}
-              onClick={handleLogout}
-            >
-              Đăng xuất
-            </button>
 
-          </div>
+        <input
+          type="password"
 
-        ) : (
+          placeholder="Password"
 
-          <>
+          value={password}
 
-            <h2>
-              🔐 Đăng nhập
-            </h2>
+          onChange={(e) =>
+            setPassword(
+              e.target.value
+            )
+          }
+        />
 
-            <form onSubmit={handleLogin}>
 
-              {error && (
-                <div className="error-box">
-                  {error}
-                </div>
-              )}
+        {
+          error &&
+          <p>{error}</p>
+        }
 
-              <div className="form-group">
 
-                <label>
-                  Tên đăng nhập
-                </label>
+        <button type="submit">
+          Đăng nhập
+        </button>
 
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) =>
-                    setUsername(e.target.value)
-                  }
-                  placeholder="Nhập tên đăng nhập"
-                />
-
-              </div>
-
-              <div className="form-group">
-
-                <label>
-                  Mật khẩu
-                </label>
-
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) =>
-                    setPassword(e.target.value)
-                  }
-                  placeholder="Nhập mật khẩu"
-                />
-
-              </div>
-
-              <button
-                type="submit"
-                className="btn btn-primary"
-                style={{ width: '100%' }}
-              >
-                Đăng nhập
-              </button>
-
-            </form>
-
-          </>
-
-        )}
-
-      </div>
+      </form>
 
     </div>
   )
 }
+
+export default LoginPage

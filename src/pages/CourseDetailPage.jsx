@@ -1,190 +1,184 @@
-import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useSetRecoilState } from 'recoil'
-import { cartState } from '../store/atoms'
-import { useFetch } from '../hooks/useFetch'
-import { mockApi } from '../api/mockApi.js'
+import {
+  useParams,
+  useNavigate
+} from "react-router-dom"
 
-export default function CourseDetailPage() {
+import {
+  useRecoilValue,
+  useSetRecoilState
+} from "recoil"
 
- 
-  const { id } = useParams()
+import {
+  cartState,
+  userState
+} from "../store/atoms"
 
- 
-  const navigate = useNavigate()
+import useFetch from "../hooks/useFetch"
+
+import { mockApi }
+from "../api/mockApi"
 
 
-  const setCart = useSetRecoilState(cartState)
+function CourseDetailPage() {
+
+  const { id } =
+    useParams()
+
+  const navigate =
+    useNavigate()
+
+  const user =
+    useRecoilValue(userState)
+
+  const setCart =
+    useSetRecoilState(cartState)
+
 
   const {
     data,
     loading,
     error
   } = useFetch(
-    () => mockApi.getCourseById(Number(id)),
+
+    () =>
+      mockApi.getCourseById(id),
+
     [id]
   )
 
-  
-  const course =
-    data?.course ||
-    data?.data ||
-    data
 
+  const handleAddToCart =
+  () => {
 
+    // chưa login
+    if (!user) {
 
-  const handleAddToCart = () => {
-
-    setCart(prevCart => {
-
-      const existed = prevCart.find(
-        item => item.id === course.id
+      alert(
+        "Bạn cần đăng nhập"
       )
 
-  
-      if (existed) {
+      navigate("/login")
 
-        return prevCart.map(item =>
-          item.id === course.id
+      return
+    }
+
+
+    setCart(prev => {
+
+      const exist =
+        prev.find(
+
+          item =>
+            item.id === data.id
+        )
+
+      // đã tồn tại
+      if (exist) {
+
+        return prev.map(item =>
+
+          item.id === data.id
+
             ? {
                 ...item,
-                quantity: item.quantity + 1
+                quantity:
+                  item.quantity + 1
               }
+
             : item
         )
       }
 
-
+      // chưa tồn tại
       return [
-        ...prevCart,
+
+        ...prev,
+
         {
-          ...course,
+          ...data,
           quantity: 1
         }
       ]
     })
 
 
-    navigate('/cart')
+    alert(
+      "Đã thêm vào giỏ hàng!"
+    )
   }
 
 
+  // loading
   if (loading) {
+
     return (
-      <div className="loading">
-        ⏳ Đang tải...
-      </div>
+      <h2>
+        Loading...
+      </h2>
     )
   }
 
 
+  // error
   if (error) {
+
     return (
-      <div className="error-box">
-        ❌ {error}
-      </div>
+      <h2>
+        {error}
+      </h2>
     )
   }
 
 
-  if (!course) {
+  // not found
+  if (!data) {
+
     return (
-      <div className="error-box">
-        ❌ Không tìm thấy khóa học
-      </div>
+      <h2>
+        Không tìm thấy khóa học
+      </h2>
     )
   }
-
-
-  const formatPrice = (p) =>
-    new Intl.NumberFormat(
-      'vi-VN',
-      {
-        style: 'currency',
-        currency: 'VND'
-      }
-    ).format(p)
 
 
   return (
-
     <div>
 
-      <Link
-        to="/courses"
-        className="btn btn-outline btn-sm"
-        style={{ marginBottom: 16 }}
+      <img
+        src={data.image}
+        alt={data.title}
+        width="300"
+      />
+
+      <h1>
+        {data.title}
+      </h1>
+
+      <h3>
+        {data.instructor}
+      </h3>
+
+      <p>
+        {data.level}
+      </p>
+
+      <p>
+        {data.description}
+      </p>
+
+      <h2>
+        {data.price}
+      </h2>
+
+
+      <button
+        onClick={handleAddToCart}
       >
-        ← Quay lại
-      </Link>
-
-
-      <div className="detail-wrap">
-
-        <div className="detail-main">
-
-          <img
-            src={course.image}
-            alt={course.title}
-          />
-
-          <h1>
-            {course.title}
-          </h1>
-
-          <div className="detail-meta">
-
-            <span className="badge badge-info">
-              {course.level}
-            </span>
-
-            &nbsp;•&nbsp;
-            👨‍🏫 {course.instructor}
-
-            &nbsp;•&nbsp;
-            ⏱️ {course.duration}
-
-            &nbsp;•&nbsp;
-            👥 {course.students} học viên
-
-          </div>
-
-          <p className="detail-description">
-            {course.description}
-          </p>
-
-        </div>
-
-
-        <div className="detail-side">
-
-          <div className="price-big">
-            {formatPrice(course.price)}
-          </div>
-
-          <button
-            className="btn btn-success"
-            style={{
-              width: '100%',
-              marginBottom: 8
-            }}
-            onClick={handleAddToCart}
-          >
-            🛒 Thêm vào giỏ hàng
-          </button>
-
-          <button
-            className="btn btn-outline"
-            style={{
-              width: '100%'
-            }}
-          >
-            ❤️ Yêu thích
-          </button>
-
-        </div>
-
-      </div>
+        Thêm vào giỏ
+      </button>
 
     </div>
   )
 }
+
+export default CourseDetailPage

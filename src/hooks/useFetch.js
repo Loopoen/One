@@ -4,15 +4,14 @@ import { useState, useEffect } from 'react'
 // Câu 6 - 
 // ============================================================
 
-export function useFetch(asyncFn, deps = []) {
+export default function useFetch(asyncFn, deps = []) {
 
-  // state dữ liệu
   const [data, setData] = useState(null)
 
-  // state loading
+  
   const [loading, setLoading] = useState(false)
 
-  // state lỗi
+
   const [error, setError] = useState(null)
 
 
@@ -22,16 +21,14 @@ export function useFetch(asyncFn, deps = []) {
 
       try {
 
-        // bắt đầu loading
         setLoading(true)
 
-        // reset lỗi
         setError(null)
 
-        // gọi async function
+      
         const response = await asyncFn()
 
-        // lưu data
+   
         setData(response)
 
       }
@@ -45,7 +42,7 @@ export function useFetch(asyncFn, deps = []) {
       }
       finally {
 
-        // tắt loading
+      
         setLoading(false)
 
       }
